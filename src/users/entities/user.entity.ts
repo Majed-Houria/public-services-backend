@@ -5,6 +5,9 @@ export type UserDocument = User & Document;
 
 @Schema({ timestamps: true })
 export class User {
+  save() {
+    throw new Error('Method not implemented.');
+  }
   @Prop({ required: true, unique: true, lowercase: true })
   email: string;
 

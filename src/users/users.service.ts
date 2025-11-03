@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
@@ -10,7 +10,7 @@ export class UsersService {
 
     async create(userData: Partial<User>, saltRounds = 10): Promise<User> {
         const existing = await this.userModel.findOne({ email: userData.email }).exec();
-        if (existing) throw new ConflictException({ message: 'Email already in use' });
+        if (existing) throw new BadRequestException('Email already in use');
 
         const hashed = await bcrypt.hash(userData.password!, saltRounds);
         const created = new this.userModel({ ...userData, password: hashed });
@@ -24,8 +24,7 @@ export class UsersService {
     async findById(id: string): Promise<User | null> {
         return this.userModel.findById(id).select('-password').exec();
     }
-
-    // For auth: fetch including password
+    /// مكررر 
     async findByEmailWithPassword(email: string): Promise<User | null> {
         return this.userModel.findOne({ email }).exec();
     }
