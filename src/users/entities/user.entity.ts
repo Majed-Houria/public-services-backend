@@ -1,13 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
+import { Product } from 'src/product/entities/product.entity';
 
 export type UserDocument = User & Document;
 
+
 @Schema({ timestamps: true })
 export class User {
-  save() {
-    throw new Error('Method not implemented.');
-  }
   @Prop({ required: true, unique: true, lowercase: true })
   email: string;
 
@@ -25,6 +24,10 @@ export class User {
 
   @Prop()
   address?: string;
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Product' }] })
+  products: Product[];
+
   toObject: any;
 }
 

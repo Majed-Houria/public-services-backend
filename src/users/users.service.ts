@@ -28,4 +28,8 @@ export class UsersService {
     async findByEmailWithPassword(email: string): Promise<User | null> {
         return this.userModel.findOne({ email }).exec();
     }
+    
+    async updateUserById(id: string, updateData: any) {
+        return this.userModel.findByIdAndUpdate(id, updateData, { new: true }).select('-password').exec();
+    }
 }

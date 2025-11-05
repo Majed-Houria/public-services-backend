@@ -43,19 +43,13 @@ export class AuthService {
   }
 
     async editProfile(userId: string, updateData: UpdateProfileDto) {
-    const user = await this.usersService.findById(userId);
-    if (!user) {
+    const updatedUser = await this.usersService.updateUserById(userId, updateData);
+    if (!updatedUser) {
       throw new NotFoundException('User not found');
     }
 
-    if (updateData.firstName !== undefined) user.firstName = updateData.firstName;
-    if (updateData.lastName !== undefined) user.lastName = updateData.lastName;
-    if (updateData.phone !== undefined) user.phone = updateData.phone;
-    if (updateData.address !== undefined) user.address = updateData.address;
+    const { password, ...result } = updatedUser.toObject ? updatedUser.toObject() : updatedUser;
 
-    user.save();
-
-    const { password, ...result } = user.toObject ? user.toObject() : user;
     return {
       id: result._id,
       email: result.email,
