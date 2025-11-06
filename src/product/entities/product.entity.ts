@@ -22,6 +22,9 @@ export class Product {
 
     @Prop({ type: Types.ObjectId, ref: 'User', required: true })
     user: User;
+
+    @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }] })
+    usersFavorite: User[];
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

@@ -4,6 +4,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UpdatePasswordDto } from './dto/UpdatePasswordDto';
 
 @Controller('auth')
 export class AuthController {
@@ -37,4 +38,11 @@ export class AuthController {
   async editProfile(@Req() req: any, @Body() updateData: UpdateProfileDto) {
     return await this.authService.editProfile(req.user._id, updateData);
   }
+  
+  @Patch('rest-password')
+  @UseGuards(JwtAuthGuard)
+  async restPassword(@Req() req: any, @Body() updatePasswordDto: UpdatePasswordDto) {
+    return await this.authService.restPassword(req.user._id, updatePasswordDto);
+  }
+  
 }
