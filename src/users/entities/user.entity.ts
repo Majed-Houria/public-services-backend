@@ -25,6 +25,9 @@ export class User {
   @Prop()
   address?: string;
 
+  @Prop()
+  image?: string;
+
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Product' }] })
   products: Product[];
 

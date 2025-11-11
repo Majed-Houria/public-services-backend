@@ -92,7 +92,7 @@ export class ProductService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, userId: string) {
     const product = await this.productModel
       .findById(id)
       .populate('category', 'name _id')
@@ -102,12 +102,15 @@ export class ProductService {
     if (!product) {
       throw new NotFoundException(`Product with ID "${id}" not found`);
     }
-
+    const isFavorite = product.usersFavorite?.some(
+      (favUserId) => favUserId.toString() == userId,
+    );
     return {
       id: product._id,
       name: product.name,
       description: product.description,
       price: product.price,
+      is_fav: isFavorite,
       category: {
         id: (product.category as any)._id,
         name: (product.category as any).name,

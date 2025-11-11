@@ -64,6 +64,8 @@ export class CategoryService {
       category: new Types.ObjectId(id),
     });
 
+    // user delete products[]
+    
     return {
       message: 'Category deleted successfully',
       id: deletedCategory._id,
