@@ -4,11 +4,11 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { UpdatePasswordDto } from './dto/UpdatePasswordDto';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DeleteAccountDto } from './dto/delete-account.dto';
+import { UpdatePasswordDto } from './dto/update_password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -56,7 +56,6 @@ export class AuthController {
     if (file) {
       updateData.image = `/uploads/${file.filename}`;
     }
-
     return await this.authService.editProfile(req.user._id, updateData);
   }
 

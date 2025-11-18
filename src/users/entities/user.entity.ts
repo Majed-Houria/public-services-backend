@@ -28,6 +28,9 @@ export class User {
   @Prop()
   image?: string;
 
+  @Prop()
+  isTechnician: boolean;
+
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Product' }] })
   products: Product[];
 

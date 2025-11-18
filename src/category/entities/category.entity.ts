@@ -13,6 +13,9 @@ export class Category {
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Product' }] })
   products: Product[];
 
+  @Prop()
+  image: string;
+
   toObject: any;
 }
 

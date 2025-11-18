@@ -4,27 +4,32 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { RegisterDto } from './dto/register.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { UpdatePasswordDto } from './dto/UpdatePasswordDto';
-import { User} from 'src/users/entities/user.entity';
+import { User, UserDocument } from 'src/users/entities/user.entity';
 import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Product, ProductDocument } from 'src/product/entities/product.entity';
 import { DeleteAccountDto } from './dto/delete-account.dto';
+import { Category, CategoryDocument } from 'src/category/entities/category.entity';
+import { join } from 'path';
+import { promises as fs } from 'fs';
+import { UpdatePasswordDto } from './dto/update_password.dto';
+
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
+    @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
 
   ) { }
 
   async register(dto: RegisterDto, saltRounds = 10) {
     const user = await this.usersService.create(dto, saltRounds);
     const { password, ...result } = user.toObject ? user.toObject() : user;
-    return { id: result._id, email: result.email, firstName: result.firstName, lastName: result.lastName, phone: result.phone, address: result.address, image: result.image, };
+    return { id: result._id, email: result.email, firstName: result.firstName, lastName: result.lastName, phone: result.phone, address: result.address, image: result.image, isTechnician: result.isTechnician };
   }
 
   async validateUser(email: string, plainPassword: string) {
@@ -33,7 +38,7 @@ export class AuthService {
     const isMatch = await bcrypt.compare(plainPassword, user.password);
     if (!isMatch) return null;
     const { password, ...result } = user.toObject ? user.toObject() : user;
-    return { id: result._id, email: result.email, firstName: result.firstName, lastName: result.lastName, phone: result.phone, address: result.address, image: result.image, };
+    return { id: result._id, email: result.email, firstName: result.firstName, lastName: result.lastName, phone: result.phone, address: result.address, image: result.image, isTechnician: result.isTechnician };
   }
 
   async login(user: any) {
@@ -51,7 +56,7 @@ export class AuthService {
     }
 
     const { password, ...result } = user.toObject ? user.toObject() : user;
-    return { id: result._id, email: result.email, firstName: result.firstName, lastName: result.lastName, phone: result.phone, address: result.address, image: result.image };
+    return { id: result._id, email: result.email, firstName: result.firstName, lastName: result.lastName, phone: result.phone, address: result.address, image: result.image, isTechnician: result.isTechnician };
   }
 
   async editProfile(userId: string, updateData: UpdateProfileDto) {
@@ -70,6 +75,7 @@ export class AuthService {
       phone: result.phone,
       address: result.address,
       image: result.image,
+      isTechnician: result.isTechnician
     };
   }
 
@@ -103,19 +109,61 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException(`User with ID "${userId}" not found`);
     }
-    const isMatch = bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       throw new BadRequestException('password is incorrect');
     }
-    const deletedProduct = await this.userModel.findByIdAndDelete(userId);
-    if (!deletedProduct) {
+    const deletedUser = await this.userModel.findByIdAndDelete(userId);
+    if (!deletedUser) {
       throw new NotFoundException(`User with ID "${userId}" not found`);
     }
+
+    const deletedProducts = await this.productModel.find({ user: userId }).select('_id image').exec();
+    deletedProducts.map(
+      p => p.image
+    );
+
+    for (const product of deletedProducts) {
+      if (product.image) {
+        const relativePath = product.image.startsWith('/')
+          ? product.image.slice(1)
+          : product.image;
+        const oldImagePath = join(process.cwd(), relativePath);
+        try {
+          await fs.unlink(oldImagePath);
+        } catch (err) {
+          console.warn('Old product image not found or cannot be deleted', err);
+        }
+      }
+    }
+
+    const deletedProductIds = deletedProducts.map(p => p._id);
+
+    await this.categoryModel.updateMany(
+      { products: { $in: deletedProductIds } },
+      { $pull: { products: { $in: deletedProductIds } } }
+    );
+
 
     await this.productModel.deleteMany({
       user: new Types.ObjectId(userId),
     });
-    
+
+    if (user.image) {
+      const relativePath = user.image.startsWith('/') ? user.image.slice(1) : user.image;
+      const oldImagePath = join(process.cwd(), relativePath);
+      try {
+        await fs.unlink(oldImagePath);
+      } catch (err) {
+        console.warn('Old image not found or cannot be deleted', err);
+      }
+    }
+
+    await this.productModel.updateMany(
+      { usersFavorite: userId },
+      { $pull: { usersFavorite: userId } }
+    );
+
     return {
       message: 'Account successfully deleted',
     };

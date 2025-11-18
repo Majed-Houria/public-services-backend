@@ -7,12 +7,15 @@ import { JwtStrategy } from './jwt.strategy';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from 'src/users/entities/user.entity';
 import { Product, ProductSchema } from 'src/product/entities/product.entity';
+import { Category, CategorySchema } from 'src/category/entities/category.entity';
 
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]),
+    MongooseModule.forFeature([{ name: Category.name, schema: CategorySchema }]),
+    
     UsersModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'defaultSecret',

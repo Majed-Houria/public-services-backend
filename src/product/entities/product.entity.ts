@@ -25,6 +25,15 @@ export class Product {
 
     @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }] })
     usersFavorite: User[];
+
+    @Prop()
+    image: string;
+
+    @Prop()
+    rate: number;
+
+    @Prop()
+    countUserRate: number;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
