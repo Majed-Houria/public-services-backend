@@ -106,8 +106,6 @@ export class ProductService {
             },
           },
           { $sort: { favoritesCount: -1 } },
-          { $limit: 8 },
-
           {
             $lookup: {
               from: 'categories',
@@ -135,8 +133,7 @@ export class ProductService {
           .find(filter)
           .populate('category', 'name _id image')
           .populate('user', 'firstName lastName email phone address _id isTechnician')
-          .sort({ createdAt: -1 })
-          .limit(8);
+          .sort({ createdAt: -1 });
         break;
 
       case 'topRated':
@@ -144,8 +141,7 @@ export class ProductService {
           .find(filter)
           .populate('category', 'name _id image')
           .populate('user', 'firstName lastName email phone address _id isTechnician')
-          .sort({ rate: -1 })
-          .limit(8);
+          .sort({ rate: -1 });
         break;
 
       default:

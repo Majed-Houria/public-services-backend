@@ -34,6 +34,7 @@ export class Product {
 
     @Prop()
     countUserRate: number;
+  populate: any;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
