@@ -32,19 +32,19 @@ jobs:
             git clean -fd
             
             # Stop existing containers gracefully
-            docker-compose down
+            docker compose down
             
             # Pull latest images (if any external images changed)
-            docker-compose pull || true
+            docker compose pull || true
             
             # Rebuild and start containers
-            docker-compose up -d --build
+            docker compose up -d --build
             
             # Clean up unused Docker resources (optional, keeps system clean)
             docker system prune -f
             
             # Show running containers for verification
-            docker-compose ps
+            docker compose ps
 
       - name: Verify deployment
         uses: appleboy/ssh-action@v1.0.3
@@ -60,7 +60,7 @@ jobs:
             sleep 5
             
             # Check if containers are running
-            docker-compose ps
+            docker compose ps
             
             # Check application health (optional - adjust URL if needed)
             # curl -f http://localhost:3000 || echo "Health check failed, but deployment completed"
