@@ -43,7 +43,7 @@ export class CategoryService {
   }
 
   async findAll() {
-    const categories = await this.categoryModel.find().select('name').exec();
+    const categories = await this.categoryModel.find().exec();
 
     return categories.map(category => ({
       id: category._id,
