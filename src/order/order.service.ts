@@ -152,6 +152,7 @@ export class OrderService {
     return filteredOrders.map(order => {
       const product: any = order.product;
       const productUser: any = product?.user;
+      const senderUser: any = order.user;
 
       return {
         id: order._id,
@@ -180,13 +181,13 @@ export class OrderService {
           } : null,
         },
         sender: productUser ? {
-          id: productUser._id,
-          email: productUser.email,
-          firstName: productUser.firstName,
-          lastName: productUser.lastName,
-          phone: productUser.phone,
-          address: productUser.address,
-          isTechnician: productUser.isTechnician,
+          id: senderUser._id,
+          email: senderUser.email,
+          firstName: senderUser.firstName,
+          lastName: senderUser.lastName,
+          phone: senderUser.phone,
+          address: senderUser.address,
+          isTechnician: senderUser.isTechnician,
         } : null,
       };
     });
