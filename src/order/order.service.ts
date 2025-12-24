@@ -90,9 +90,16 @@ export class OrderService {
       })
       .populate('user');
 
-    return orders.map(order => {
+    const filteredOrders = orders.filter(order => order.product);
+
+    if (!filteredOrders.length) {
+      return [];
+    }
+
+    return filteredOrders.map(order => {
       const product: any = order.product;
       const productUser: any = product?.user;
+      const senderUser: any = order.user;
 
       return {
         id: order._id,
@@ -105,34 +112,39 @@ export class OrderService {
           image: product?.image,
           rate: product?.rate,
           countUserRate: product?.countUserRate,
-          category: product?.category ? {
-            id: product.category._id,
-            name: product.category.name,
-            image: product.category.image,
-          } : null,
-          user: productUser ? {
-            id: productUser._id,
-            email: productUser.email,
-            firstName: productUser.firstName,
-            lastName: productUser.lastName,
-            phone: productUser.phone,
-            address: productUser.address,
-            isTechnician: productUser.isTechnician,
-          } : null,
+          category: product?.category
+            ? {
+              id: product.category._id,
+              name: product.category.name,
+              image: product.category.image,
+            }
+            : null,
+          user: productUser
+            ? {
+              id: productUser._id,
+              email: productUser.email,
+              firstName: productUser.firstName,
+              lastName: productUser.lastName,
+              phone: productUser.phone,
+              address: productUser.address,
+              isTechnician: productUser.isTechnician,
+            }
+            : null,
         },
-        sender: productUser ? {
-          id: productUser._id,
-          email: productUser.email,
-          firstName: productUser.firstName,
-          lastName: productUser.lastName,
-          phone: productUser.phone,
-          address: productUser.address,
-          isTechnician: productUser.isTechnician,
-        } : null,
+        sender: senderUser
+          ? {
+            id: senderUser._id,
+            email: senderUser.email,
+            firstName: senderUser.firstName,
+            lastName: senderUser.lastName,
+            phone: senderUser.phone,
+            address: senderUser.address,
+            isTechnician: senderUser.isTechnician,
+          }
+          : null,
       };
     });
   }
-
   async findAllReceiver(userId: string) {
     const orders = await this.orderModel
       .find()
@@ -197,7 +209,7 @@ export class OrderService {
     const { state } = updateOrderDto;
 
     const order = await this.orderModel
-      .findOne({ _id: id }) 
+      .findOne({ _id: id })
       .populate({
         path: 'product',
         populate: ['category', 'user'],
